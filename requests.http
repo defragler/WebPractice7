@@ -1,0 +1,144 @@
+@host = http://localhost:3000
+
+### ===== Рівень 1–2: CRUD =====
+
+### Створити пристрій 1
+# @name create1
+POST {{host}}/gadgets
+Content-Type: application/json
+
+{
+  "title": "Ноутбук Pro 16",
+  "price": 45000,
+  "warrantyMonths": 24,
+  "cpu": "M3 Max",
+  "ramGb": 36
+}
+
+###
+@id = {{create1.response.body.id}}
+
+### Створити пристрій 2
+POST {{host}}/gadgets
+Content-Type: application/json
+
+{
+  "title": "Бездротові навушники ANC",
+  "price": 5200,
+  "warrantyMonths": 12,
+  "cpu": "H2 Audio Chip",
+  "ramGb": 2
+}
+
+### Створити пристрій 3
+POST {{host}}/gadgets
+Content-Type: application/json
+
+{
+  "title": "Смартфон Nova X",
+  "price": 18999.99,
+  "warrantyMonths": 24,
+  "cpu": "Snapdragon 8 Gen 3",
+  "ramGb": 12
+}
+
+### Створити пристрій 4
+POST {{host}}/gadgets
+Content-Type: application/json
+
+{
+  "title": "Планшет Tab S",
+  "price": 12500,
+  "warrantyMonths": 12,
+  "cpu": "Dimensity 9000",
+  "ramGb": 8
+}
+
+### Створити пристрій 5
+POST {{host}}/gadgets
+Content-Type: application/json
+
+{
+  "title": "Ігровий ноутбук Titan",
+  "price": 62000,
+  "warrantyMonths": 36,
+  "cpu": "Ryzen 9 7945HX",
+  "ramGb": 32
+}
+
+### Створити пристрій 6 (недоступний)
+POST {{host}}/gadgets
+Content-Type: application/json
+
+{
+  "title": "Смарт-годинник Pulse",
+  "price": 7300.5,
+  "warrantyMonths": 12,
+  "cpu": "Cortex-M55",
+  "ramGb": 1,
+  "isAvailable": false
+}
+
+### Валідація: некоректні дані -> 400
+POST {{host}}/gadgets
+Content-Type: application/json
+
+{
+  "title": "",
+  "price": -5,
+  "warrantyMonths": 1.5,
+  "cpu": "X",
+  "ramGb": 4
+}
+
+### Отримати за ID
+GET {{host}}/gadgets/{{id}}
+
+### Неіснуючий ID (валідний UUID) -> 404
+GET {{host}}/gadgets/00000000-0000-4000-8000-000000000000
+
+### Некоректний UUID -> 400
+GET {{host}}/gadgets/not-a-uuid
+
+### Оновити (часткове)
+PATCH {{host}}/gadgets/{{id}}
+Content-Type: application/json
+
+{
+  "price": 43999.99,
+  "isAvailable": false
+}
+
+### ===== Рівень 3: пагінація, пошук, сортування =====
+
+### Сторінка 1, по 3 -> рівно 3 записи + meta
+GET {{host}}/gadgets?page=1&limit=3
+
+### Сторінка 2, по 3
+GET {{host}}/gadgets?page=2&limit=3
+
+### Пошук за title (регістронезалежний)
+GET {{host}}/gadgets?search=ноутбук
+
+### Сортування за ціною (за зростанням)
+GET {{host}}/gadgets?sortBy=price&order=ASC
+
+### Некоректний limit -> 400
+GET {{host}}/gadgets?limit=1000
+
+### ===== Рівень 3: Soft Delete =====
+
+### 1) Видалити (204)
+DELETE {{host}}/gadgets/{{id}}
+
+### 2) Запис зник із загальної видачі
+GET {{host}}/gadgets
+
+### 3) GET за ID -> 404
+GET {{host}}/gadgets/{{id}}
+
+### 4) Відновити
+PATCH {{host}}/gadgets/{{id}}/restore
+
+### 5) Запис знову в каталозі
+GET {{host}}/gadgets
